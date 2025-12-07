@@ -1,0 +1,32 @@
+[
+{
+  "directory": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\gcc.exe    -o CMakeFiles\\my_app.dir\\main.c.obj -c \"C:\\Users\\Pulkit Sukhija\\OneDrive - saintmarksschool.in\\Documents\\Programming\\Project\\SDF\\multi-sport-scoreboard\\main.c\"",
+  "file": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/main.c",
+  "output": "CMakeFiles/my_app.dir/main.c.obj"
+},
+{
+  "directory": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\gcc.exe    -o CMakeFiles\\my_app.dir\\badminton.c.obj -c \"C:\\Users\\Pulkit Sukhija\\OneDrive - saintmarksschool.in\\Documents\\Programming\\Project\\SDF\\multi-sport-scoreboard\\badminton.c\"",
+  "file": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/badminton.c",
+  "output": "CMakeFiles/my_app.dir/badminton.c.obj"
+},
+{
+  "directory": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\gcc.exe    -o CMakeFiles\\my_app.dir\\basketball.c.obj -c \"C:\\Users\\Pulkit Sukhija\\OneDrive - saintmarksschool.in\\Documents\\Programming\\Project\\SDF\\multi-sport-scoreboard\\basketball.c\"",
+  "file": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/basketball.c",
+  "output": "CMakeFiles/my_app.dir/basketball.c.obj"
+},
+{
+  "directory": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\gcc.exe    -o CMakeFiles\\my_app.dir\\tennis.c.obj -c \"C:\\Users\\Pulkit Sukhija\\OneDrive - saintmarksschool.in\\Documents\\Programming\\Project\\SDF\\multi-sport-scoreboard\\tennis.c\"",
+  "file": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/tennis.c",
+  "output": "CMakeFiles/my_app.dir/tennis.c.obj"
+},
+{
+  "directory": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\gcc.exe    -o CMakeFiles\\my_app.dir\\volleyball.c.obj -c \"C:\\Users\\Pulkit Sukhija\\OneDrive - saintmarksschool.in\\Documents\\Programming\\Project\\SDF\\multi-sport-scoreboard\\volleyball.c\"",
+  "file": "C:/Users/Pulkit Sukhija/OneDrive - saintmarksschool.in/Documents/Programming/Project/SDF/multi-sport-scoreboard/volleyball.c",
+  "output": "CMakeFiles/my_app.dir/volleyball.c.obj"
+}
+]
