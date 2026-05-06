@@ -1,47 +1,75 @@
 # Multi-Sport Scoreboard
 
-A console-based application written in C that functions as a digital scoreboard for multiple sports. This project allows users to track scores, manage game states, and determine winners for Badminton, Volleyball, Tennis, Basketball, and Cricket.
+A modular C++ scoreboard application with a web-based GUI and a lightweight HTTP API. The project provides sport-specific scoring logic, CSV persistence, and an embedded HTTP server so scores can be viewed remotely via a simple web UI.
 
-## Features
+**What changed**: Project moved to a C++ codebase (`main.cpp`) and added an HTTP server (`ScoreboardServer.h`, `httplib.h`) plus persistence and archiving utilities (`ArchiveManager.h`, `scores.csv`). The README below reflects the current repository layout and build/run instructions.
 
-- **Multi-Sport Support**:
-  - **Badminton**: Standard scoring with deuce logic (win by 2 points).
-  - **Volleyball**: Standard scoring (first to 25, win by 2).
-  - **Tennis**: Traditional scoring system (15, 30, 40) with deuce handling using array mapping.
-  - **Basketball**: Manual score entry (1, 2, or 3 points) and game reset functionality.
-  - **Cricket**: Detailed scorecard generation including runs, balls, wickets, and overs.
-- **Interactive Menu**: Easy-to-use text-based menu to switch between sports.
-- **Real-time Updates**: Displays current scores and server information after every point.
+**Highlights**
+- **Web UI / HTTP Server**: Embedded server implemented in `ScoreboardServer.h` using the single-file `httplib.h`. The server serves `index.html` and exposes current scores.
+- **Persistence**: Scores are stored/loaded from [scores.csv](scores.csv) and historical data is managed by `ArchiveManager.h`.
+- **Multi-Sport Modules**: Sport-specific logic is organized in header modules.
 
-## Key C Features Used
+**Supported sports (modules present)**
+- [Badminton.h](Badminton.h)
+- [Basketball.h](Basketball.h)
+- [Cricket.h](Cricket.h)
+- [Football.h](Football.h)
+- [Sport.h](Sport.h) (shared interfaces and helpers)
 
-This project demonstrates various fundamental concepts of the C programming language:
-
-- **Modular Programming**: The project is split into multiple source files (`badminton.c`, `tennis.c`, etc.) and integrated into `main.c` to maintain code organization.
-- **Control Flow**:
-  - **Loops**: Extensive use of `while(1)` loops for continuous game states and menu navigation.
-  - **Conditional Statements**: Complex `if-else` logic to handle scoring rules, deuce conditions, and winning criteria.
-  - **Switch-Case**: Used for the main menu selection and specific game actions (like in Basketball).
-  - **Jump Statements**: Usage of `break` to exit loops when a game ends and `continue` to handle invalid inputs.
-- **Input/Output Handling**:
-  - Standard I/O using `printf` and `scanf`.
-  - **Buffer Management**: Custom `clearInputBuffer()` function to handle newline characters left in the input stream, preventing skipped inputs.
-- **Data Structures**:
-  - **Arrays**: Used for storing player names (strings) and mapping tennis scores (`0, 15, 30, 40`).
-  - **Variables**: Integer tracking for scores and flags.
-- **Operators**:
-  - **Ternary Operator**: Used for concise conditional logic when displaying the current server (e.g., `(n == 1) ? np1 : np2`).
-  - **Logical Operators**: Complex conditions (e.g., `&&`, `||`) to determine win states.
+**Other notable files**
+- [ArchiveManager.h](ArchiveManager.h) : Archiving and score persistence helper.
+- [ScoreboardServer.h](ScoreboardServer.h) : HTTP server wrapper and endpoints.
+- [httplib.h](httplib.h) : Embedded single-header HTTP library used by the server.
+- [index.html](index.html) : Minimal web client served by the server.
+- [scores.csv](scores.csv) : Persistent CSV store for current scores.
+- [server_out.txt](server_out.txt) : Example/server log output captured from a run.
 
 ## Getting Started
 
 ### Prerequisites
 
-- A C compiler (GCC recommended).
+- A C++ compiler (g++/MinGW on Windows is used in the provided tasks).
 
-### Compilation
+### Build (Windows / MinGW)
 
-The project is structured such that the sport-specific modules are included directly into the main file. To build the project, compile `main.c`.
+Use the provided VS Code task or run the following command in a terminal from the project root:
 
-```bash
-gcc main.c -o scoreboard
+```powershell
+"C:\Program Files\mingw64\bin\g++.exe" -g "main.cpp" -o "main.exe" -lws2_32 -D_WIN32_WINNT=0x0A00
+```
+
+Notes:
+- The `-lws2_32` link flag is required on Windows for sockets.
+- The `_WIN32_WINNT` macro enables modern Windows networking APIs when building with MinGW.
+
+### Run
+
+Start the executable from the project root (the server will print its bind address and port):
+
+```powershell
+./main.exe
+```
+
+- The server serves `index.html`; open the URL printed by the program in your browser to access the web UI.
+- The program writes logs to [server_out.txt](server_out.txt) and updates [scores.csv](scores.csv) as games progress.
+
+## HTTP Endpoints
+
+- **GET /scores**: Returns the current active game's data as JSON (`application/json`). If no game is active returns `{}`.
+- **POST /start**: Start a new game. Accepts form or query parameters: `sport` (Cricket|Football|Basketball|Badminton), `team1`, `team2`, optional `tossWin`, `choice`. Archives any previous active game before starting a new one.
+- **POST /update**: Update the active game's score. Parameters: `team` (team name) and `points` (integer). Returns updated game JSON. If the game ends, it is archived automatically.
+- **POST /nextphase**: Advance to the next phase (used for Cricket innings). Returns JSON status `{"status":"ok"}` on success.
+- **GET /abandon**: Abandon the current game and archive it with remark `Abandoned`.
+- **GET /history**: Returns archived games as JSON (reads from `scores.csv`).
+
+- Default server address: `http://localhost:8080`. `main.cpp` launches the default browser automatically shortly after startup.
+
+## Development Notes
+
+- The main entry is `main.cpp` and sport logic resides in the corresponding header files. The design favors small, focused modules for each sport and a thin server wrapper to present scores via HTTP.
+- To add a new sport: implement a new header that follows the interface patterns in `Sport.h` and register it in `main.cpp`.
+
+## Troubleshooting
+
+- If build fails with socket-related errors on Windows, ensure MinGW's `libws2_32` is available and that you are passing `-lws2_32`.
+- If the web UI does not load, check `server_out.txt` for the bound port and any error messages.

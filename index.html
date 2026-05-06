@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Sport Scoreboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+        .tabs { margin-bottom: 20px; }
+        .tab { padding: 10px 20px; margin: 0 5px; cursor: pointer; background: #333; color: #aaa; border: none; font-size: 16px; border-radius: 5px; transition: 0.3s; }
+        .tab:hover { background: #444; color: #fff; }
+        .tab.active { background: #007acc; color: #fff; box-shadow: 0 0 10px rgba(0, 122, 204, 0.5); }
+        
+        .setup { max-width: 400px; margin: 20px auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .setup h2 { margin-top: 0; color: #fff; }
+        input { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 4px; }
+        input:focus { outline: none; border-color: #007acc; }
+        
+        button { cursor: pointer; padding: 10px 20px; background: #007acc; color: white; border: none; border-radius: 4px; font-size: 16px; transition: 0.3s; }
+        button:hover { background: #005f9e; }
+        
+        #active-game { max-width: 800px; margin: 0 auto; }
+        .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-top: 20px; }
+        .team-panel { background: #252526; padding: 20px; border-radius: 8px; }
+        h1 { margin: 0 0 10px; font-size: 1.5em; color: #ddd; }
+        .score { font-size: 4em; font-weight: bold; color: #4caf50; margin: 10px 0; text-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
+        
+        .controls button { margin: 5px; padding: 8px 12px; font-size: 14px; background: #3e3e42; border: 1px solid #555; }
+        .controls button:hover { background: #505054; border-color: #777; }
+        .controls button:active { background: #007acc; border-color: #007acc; }
+
+        #history { margin-top: 40px; max-width: 800px; margin-left: auto; margin-right: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #1e1e1e; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #2d2d2d; color: #fff; font-weight: 600; }
+        tr:nth-child(even) { background: #252526; }
+        tr:hover { background: #333; }
+
+        #winner-banner {
+            background-color: #4caf50;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+            animation: popIn 0.5s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tabs">
+        <button class="tab" onclick="setSport('Cricket')">Cricket</button>
+        <button class="tab" onclick="setSport('Football')">Football</button>
+        <button class="tab" onclick="setSport('Basketball')">Basketball</button>
+        <button class="tab" onclick="setSport('Badminton')">Badminton</button>
+    </div>
+
+    <div id="game-setup" class="setup">
+        <h2>Start New Game</h2>
+        <input type="text" id="team1" placeholder="Team 1 Name">
+        <input type="text" id="team2" placeholder="Team 2 Name">
+        <div id="cricket-toss" style="display:none; text-align: left; margin-top: 10px; background: #2d2d2d; padding: 10px; border-radius: 4px;">
+            <label>Toss Winner:</label>
+            <select id="toss-winner" style="width: 100%; padding: 8px; margin: 5px 0;">
+                <option value="Team1">Team 1</option>
+                <option value="Team2">Team 2</option>
+            </select>
+            <label>Choice:</label>
+            <select id="toss-choice" style="width: 100%; padding: 8px; margin: 5px 0;">
+                <option value="Bat">Bat</option>
+                <option value="Bowl">Bowl</option>
+            </select>
+        </div>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="active-game" style="display:none;">
+        <h2 id="sport-title">Sport</h2>
+        <h3 id="game-status" style="color: #4caf50;"></h3>
+        <div id="game-controls-bar" style="margin-bottom: 20px;">
+            <button id="btn-abandon" onclick="abandonGame()" style="background: #e53935; display: none;">Abandon Game</button>
+            <button id="btn-finish-innings" onclick="finishInnings()" style="background: #ff9800; display: none;">Finish Innings</button>
+            <button id="btn-newgame" onclick="resetGame()" style="background: #43a047; display: none;">Start New Game</button>
+        </div>
+        <div class="scoreboard">
+            <div class="team-panel">
+                <h1 id="t1-name">Team 1</h1>
+                <div id="t1-score" class="score">0</div>
+                <div class="controls" id="t1-controls">
+                    <button onclick="updateScore(1, 1)">+1</button>
+                </div>
+            </div>
+            <div class="team-panel">
+                <h1 id="t2-name">Team 2</h1>
+                <div id="t2-score" class="score">0</div>
+                <div class="controls" id="t2-controls">
+                    <button onclick="updateScore(2, 1)">+1</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="history">
+        <h3>Match History</h3>
+        <table>
+            <thead><tr><th>Sport</th><th>Team 1</th><th>Score</th><th>Team 2</th><th>Score</th><th>Result</th></tr></thead>
+            <tbody id="history-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentSport = 'Cricket';
+        let team1Name = '';
+        let team2Name = '';
+        let gameInProgress = false;
+
+        function setSport(sport) {
+            if (gameInProgress) {
+                alert("Cannot change sport while a game is in progress. Please finish or abandon the current game.");
+                return;
+            }
+            currentSport = sport;
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            // Find the button with text content matching sport and set active
+            const buttons = document.querySelectorAll('.tab');
+            buttons.forEach(btn => {
+                if (btn.innerText === sport) btn.classList.add('active');
+            });
+            
+            // Show/Hide Toss for Cricket
+            if (sport === 'Cricket') {
+                document.getElementById('cricket-toss').style.display = 'block';
+            } else {
+                document.getElementById('cricket-toss').style.display = 'none';
+            }
+        }
+
+        async function startGame() {
+            const t1 = document.getElementById('team1').value;
+            const t2 = document.getElementById('team2').value;
+            if(!t1 || !t2) { alert("Please enter both team names"); return; }
+            
+            team1Name = t1;
+            team2Name = t2;
+            
+            let url = `/start?sport=${currentSport}&team1=${encodeURIComponent(t1)}&team2=${encodeURIComponent(t2)}`;
+            
+            if (currentSport === 'Cricket') {
+                const tossWin = document.getElementById('toss-winner').value;
+                const choice = document.getElementById('toss-choice').value;
+                
+                // Map toss winner selection to actual team name
+                let winnerName = (tossWin === 'Team1') ? t1 : t2;
+                url += `&tossWin=${encodeURIComponent(winnerName)}&choice=${choice}`;
+            }
+
+            await fetch(url, { method: 'POST' });
+            
+            document.getElementById('game-setup').style.display = 'none';
+            document.getElementById('active-game').style.display = 'block';
+            document.getElementById('sport-title').innerText = currentSport;
+            document.getElementById('t1-name').innerText = t1;
+            
+            document.getElementById('t2-name').innerText = t2;
+            
+            // Show Abandon, Hide New Game
+            document.getElementById('btn-abandon').style.display = 'inline-block';
+            document.getElementById('btn-newgame').style.display = 'none';
+            
+            if (currentSport === 'Cricket') {
+                document.getElementById('btn-finish-innings').style.display = 'inline-block';
+            } else {
+                document.getElementById('btn-finish-innings').style.display = 'none';
+            }
+
+            gameInProgress = true;
+            
+            renderControls();
+            
+            // Clear any old banner
+            const banner = document.getElementById('winner-banner');
+            if(banner) banner.remove();
+        }
+
+        async function finishInnings() {
+            if(!confirm("Are you sure you want to finish the innings?")) return;
+            await fetch('/nextphase', { method: 'POST' });
+            pollScore();
+        }
+
+        async function abandonGame() {
+            if(!confirm("Are you sure you want to abandon this game? It will be saved as 'Abandoned'.")) return;
+            const res = await fetch('/abandon');
+            const data = await res.json();
+            if(data.status === 'abandoned') {
+                pollScore(); // refresh one last time to show state
+            }
+        }
+
+        function resetGame() {
+            gameInProgress = false;
+            document.getElementById('active-game').style.display = 'none';
+            document.getElementById('game-setup').style.display = 'block';
+            document.getElementById('team1').value = '';
+            document.getElementById('team2').value = '';
+            
+            // Remove banner
+            const banner = document.getElementById('winner-banner');
+            if(banner) banner.remove();
+        }
+
+        function renderControls() {
+            const buildBtns = (teamId, teamName) => {
+                // Determine team identifier for API (1 or 2)
+                // But wait, the update function likely takes team NAME in previous code, 
+                // let's check updateScore implementation...
+                // Previous code: buildBtns was called with teamName.
+                // HTML calls updateScore(1, 1). Wait, previous code had updateScore in HTML, but buildBtns 
+                // generated buttons calling `update`.
+                // Let's stick to generating buttons that call `update`.
+                let encodedName = teamName; 
+                let html = '';
+                if(currentSport === 'Basketball') {
+                    html += `<button onclick="update('${encodedName}', 1)">+1</button>`;
+                    html += `<button onclick="update('${encodedName}', 2)">+2</button>`;
+                    html += `<button onclick="update('${encodedName}', 3)">+3</button>`;
+                } else if (currentSport === 'Football') {
+                    html += `<button onclick="update('${encodedName}', 1)">Goal</button>`;
+                } else if (currentSport === 'Cricket') {
+                    html += `<button onclick="update('${encodedName}', 1)">1</button>`;
+                    html += `<button onclick="update('${encodedName}', 4)">4</button>`;
+                    html += `<button onclick="update('${encodedName}', 6)">6</button>`;
+                    html += `<button onclick="update('${encodedName}', -1)">OUT</button>`;
+                } else if (currentSport === 'Badminton') {
+                     html += `<button onclick="update('${encodedName}', 1)">Point</button>`;
+                } else {
+                    html += `<button onclick="update('${encodedName}', 1)">Point</button>`;
+                }
+                return html;
+            };
+            document.getElementById('t1-controls').innerHTML = buildBtns(1, team1Name);
+            document.getElementById('t2-controls').innerHTML = buildBtns(2, team2Name);
+        }
+
+        async function update(team, points) {
+            if(!gameInProgress) return;
+            await fetch('/update?team=' + encodeURIComponent(team) + '&points=' + points, { method: 'POST' });
+            pollScore();
+        }
+
+        async function pollScore() {
+            try {
+                const res = await fetch('/scores');
+                const data = await res.json();
+                
+                // If backend has no sport, do nothing
+                if(!data.sport) return;
+
+                if(data.score1 !== undefined) {
+                     document.getElementById('t1-score').innerText = data.score1 + (data.wickets1 !== undefined ? '/' + data.wickets1 : '');
+                     document.getElementById('t2-score').innerText = data.score2 + (data.wickets2 !== undefined ? '/' + data.wickets2 : '');
+                    
+                    // Update Status
+                    if (data.status) {
+                        document.getElementById('game-status').innerText = data.status;
+                    } else {
+                        document.getElementById('game-status').innerText = "";
+                    }
+
+                    // Check for Winner or Abandoned
+                    let bannerText = "";
+                    if (data.abandoned) {
+                        bannerText = "Match Abandoned";
+                        gameInProgress = false;
+                    } else if (data.result && data.result !== "") {
+                        bannerText = data.result;
+                        gameInProgress = false;
+                    } else if (data.winner && data.winner !== "") {
+                        bannerText = data.winner + " Wins!";
+                        gameInProgress = false;
+                    }
+
+                    if (bannerText) {
+                        showBanner(bannerText);
+                        document.querySelectorAll('.controls button').forEach(b => b.disabled = true);
+                        document.getElementById('btn-abandon').style.display = 'none';
+                        document.getElementById('btn-finish-innings').style.display = 'none';
+                        document.getElementById('btn-newgame').style.display = 'inline-block';
+                    } else {
+                        // Game is active
+                        if (currentSport === 'Cricket' && data.battingTeam) {
+                            // Enable buttons only for batting team
+                            const t1Btns = document.querySelectorAll('#t1-controls button');
+                            const t2Btns = document.querySelectorAll('#t2-controls button');
+                            
+                            t1Btns.forEach(b => b.disabled = (data.battingTeam !== 1));
+                            t2Btns.forEach(b => b.disabled = (data.battingTeam !== 2));
+                        } else {
+                             document.querySelectorAll('.controls button').forEach(b => b.disabled = false);
+                        }
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function showBanner(text) {
+             let banner = document.getElementById('winner-banner');
+             if (!banner) {
+                 banner = document.createElement('div');
+                 banner.id = 'winner-banner';
+                 document.body.appendChild(banner);
+             }
+             banner.innerText = text;
+             banner.style.display = 'block';
+        }
+        
+        async function loadHistory() {
+            const res = await fetch('/history');
+            const data = await res.json();
+            const body = document.getElementById('history-body');
+            body.innerHTML = data.map(r => `<tr><td>${r.sport}</td><td>${r.team1}</td><td>${r.score1}</td><td>${r.team2}</td><td>${r.score2}</td><td>${r.remark || ''}</td></tr>`).join('');
+        }
+
+        setInterval(() => {
+            if(gameInProgress || document.getElementById('active-game').style.display === 'block') {
+                pollScore();
+            }
+            loadHistory();
+        }, 2000);
+
+        loadHistory();
+    </script>
+</body>
+</html>
